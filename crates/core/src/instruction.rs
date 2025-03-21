@@ -25,7 +25,7 @@ use {
         transaction::TransactionMetadata,
     },
     async_trait::async_trait,
-    serde::Deserialize,
+    serde::{Deserialize, Serialize},
     solana_sdk::{instruction::AccountMeta, pubkey::Pubkey},
     std::{ops::Deref, sync::Arc},
 };
@@ -75,7 +75,7 @@ pub type InstructionsWithMetadata =
 /// - `accounts`: A vector of `AccountMeta`, representing the accounts involved
 ///   in the instruction.
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct DecodedInstruction<T> {
     pub program_id: Pubkey,
     pub data: T,
