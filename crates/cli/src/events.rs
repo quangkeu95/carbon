@@ -84,9 +84,12 @@ pub fn process_events(idl: &Idl) -> Vec<EventData> {
         } else {
             event.name.to_snake_case() + "_event"
         };
+
+        let mut append_event_suffix = false;
         let struct_name = if ends_with_event {
             event.name.to_upper_camel_case()
         } else {
+            append_event_suffix = true;
             event.name.to_upper_camel_case() + "Event"
         };
         let discriminator = legacy_compute_event_discriminator(&event.name);
@@ -94,7 +97,12 @@ pub fn process_events(idl: &Idl) -> Vec<EventData> {
         let mut args = Vec::new();
 
         for ty in &idl.types {
-            if ty.name == struct_name {
+            let struct_name_match = if append_event_suffix {
+                ty.name == struct_name.trim_end_matches("Event")
+            } else {
+                ty.name == struct_name
+            };
+            if struct_name_match {
                 if let Some(fields) = &ty.type_.fields {
                     for field in fields {
                         let rust_type = idl_type_to_rust_type(&field.type_);
