@@ -232,8 +232,15 @@ impl<T: InstructionDecoderCollection, U> TransactionPipe<T, U> {
 /// A `Box<Vec<ParsedInstruction<T>>>` containing the parsed instructions.
 pub fn parse_instructions<T: InstructionDecoderCollection>(
     nested_ixs: &[NestedInstruction],
+    stack_height: Option<u32>,
 ) -> Vec<ParsedInstruction<T>> {
-    log::trace!("parse_instructions(nested_ixs: {:?})", nested_ixs);
+    log::trace!(
+        "parse_instructions(nested_ixs length: {:?})",
+        nested_ixs.len()
+    );
+
+    let stack_height = stack_height.unwrap_or(0);
+    log::trace!("stack_height: {:?}", stack_height);
 
     let mut parsed_instructions: Vec<ParsedInstruction<T>> = Vec::new();
 
@@ -243,11 +250,17 @@ pub fn parse_instructions<T: InstructionDecoderCollection>(
             parsed_instructions.push(ParsedInstruction {
                 program_id: nested_ix.instruction.program_id,
                 instruction,
-                inner_instructions: parse_instructions(&nested_ix.inner_instructions),
+                inner_instructions: parse_instructions(
+                    &nested_ix.inner_instructions,
+                    Some(stack_height + 1),
+                ),
             });
         } else {
             for inner_ix in nested_ix.inner_instructions.iter() {
-                parsed_instructions.extend(parse_instructions(&[inner_ix.clone()]));
+                parsed_instructions.extend(parse_instructions(
+                    &[inner_ix.clone()],
+                    Some(stack_height + 1),
+                ));
             }
         }
     }
@@ -301,7 +314,7 @@ where
             instructions,
         );
 
-        let parsed_instructions = parse_instructions(instructions);
+        let parsed_instructions = parse_instructions(instructions, None);
 
         let matched_data = self.matches_schema(&parsed_instructions);
 
