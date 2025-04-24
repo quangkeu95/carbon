@@ -256,12 +256,12 @@ pub fn parse_instructions<T: InstructionDecoderCollection>(
                 ),
             });
         } else {
-            for inner_ix in nested_ix.inner_instructions.iter() {
-                parsed_instructions.extend(parse_instructions(
-                    &[inner_ix.clone()],
-                    Some(stack_height + 1),
-                ));
-            }
+            // for inner_ix in nested_ix.inner_instructions.iter() {
+            //     parsed_instructions.extend(parse_instructions(
+            //         &[inner_ix.clone()],
+            //         Some(stack_height + 1),
+            //     ));
+            // }
         }
     }
 
