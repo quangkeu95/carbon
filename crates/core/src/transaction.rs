@@ -238,6 +238,9 @@ pub fn parse_instructions<T: InstructionDecoderCollection>(
         "parse_instructions(nested_ixs length: {:?})",
         nested_ixs.len()
     );
+    for nested_ix in nested_ixs {
+        log::trace!("nested_ix: {:?}", nested_ix);
+    }
 
     let stack_height = stack_height.unwrap_or(0);
     log::trace!("stack_height: {:?}", stack_height);
