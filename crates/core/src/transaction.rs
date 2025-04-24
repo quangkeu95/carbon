@@ -239,6 +239,7 @@ pub fn parse_instructions<T: InstructionDecoderCollection>(
 
     for nested_ix in nested_ixs {
         if let Some(instruction) = T::parse_instruction(&nested_ix.instruction) {
+            log::trace!("push instruction: {:?}", instruction);
             parsed_instructions.push(ParsedInstruction {
                 program_id: nested_ix.instruction.program_id,
                 instruction,
