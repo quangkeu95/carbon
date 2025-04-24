@@ -238,14 +238,12 @@ pub fn parse_instructions<T: InstructionDecoderCollection>(
         "parse_instructions(nested_ixs length: {:?})",
         nested_ixs.len()
     );
-    for nested_ix in nested_ixs {
-        log::trace!("nested_ix: {:?}", nested_ix);
-    }
 
     let stack_height = stack_height.unwrap_or(0);
     log::trace!("stack_height: {:?}", stack_height);
 
     let mut parsed_instructions: Vec<ParsedInstruction<T>> = Vec::new();
+    let mut inner_nested_ixs: Vec<&NestedInstruction> = Vec::new();
 
     for nested_ix in nested_ixs {
         if let Some(instruction) = T::parse_instruction(&nested_ix.instruction) {
@@ -259,12 +257,18 @@ pub fn parse_instructions<T: InstructionDecoderCollection>(
                 ),
             });
         } else {
-            // for inner_ix in nested_ix.inner_instructions.iter() {
-            //     parsed_instructions.extend(parse_instructions(
-            //         &[inner_ix.clone()],
-            //         Some(stack_height + 1),
-            //     ));
-            // }
+            inner_nested_ixs.extend(nested_ix.inner_instructions.iter());
+        }
+    }
+
+    for nested_ix in inner_nested_ixs {
+        if let Some(instruction) = T::parse_instruction(&nested_ix.instruction) {
+            log::trace!("push instruction: {:?}", instruction);
+            parsed_instructions.push(ParsedInstruction {
+                program_id: nested_ix.instruction.program_id,
+                instruction,
+                inner_instructions: parse_instructions(&nested_ix.inner_instructions, Some(1)),
+            });
         }
     }
 
