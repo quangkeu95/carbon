@@ -6,7 +6,7 @@ use {
         metrics::MetricsCollection,
     },
     futures::{stream::try_unfold, TryStreamExt},
-    jito_protos::shredstream::{
+    carbon_jito_protos::shredstream::{
         shredstream_proxy_client::ShredstreamProxyClient, SubscribeEntriesRequest,
     },
     scc::HashCache,
@@ -125,6 +125,7 @@ impl Datasource for JitoShredstreamGrpcClient {
                                     },
                                     slot: message.slot,
                                     block_time,
+                                    block_hash: None,
                                 }));
 
                                 if let Err(e) = sender.try_send(update) {
