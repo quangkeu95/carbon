@@ -9,11 +9,10 @@ carbon-log-metrics = { workspace = true }
 carbon-moonshot-decoder = { workspace = true }
 carbon-rpc-block-subscribe-datasource = { workspace = true }
 solana-client = { workspace = true }
-solana-pubkey = { workspace = true }
-solana-transaction-status = { workspace = true }
 
 async-trait = { workspace = true }
 dotenv = { workspace = true }
 env_logger = { workspace = true }
 log = { workspace = true }
+solana-instruction = { workspace = true }
 tokio = { workspace = true, features = ["full"] }

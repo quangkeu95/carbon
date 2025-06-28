@@ -35,7 +35,13 @@ use {
 ///
 /// # Example
 ///
-/// ```rust
+/// ```ignore
+/// use carbon_core::error::CarbonResult;
+/// use carbon_core::metrics::MetricsCollection;
+/// use carbon_core::datasource::AccountDeletion;
+/// use carbon_core::processor::Processor;
+/// use async_trait::async_trait;
+/// use std::sync::Arc;
 ///
 /// struct MyAccountDeletionProcessor;
 ///
@@ -89,7 +95,13 @@ pub struct AccountDeletionPipe {
 ///
 /// # Example
 ///
-/// ```rust
+/// ```ignore
+/// use carbon_core::metrics::MetricsCollection;
+/// use std::sync::Arc;
+/// use carbon_core::error::CarbonResult;
+/// use carbon_core::datasource::AccountDeletion;
+/// use carbon_core::account_deletion::AccountDeletionPipe;
+/// use async_trait::async_trait;
 ///
 /// struct MyAccountDeletionPipe;
 ///

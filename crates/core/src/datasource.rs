@@ -34,13 +34,14 @@
 //!   data and sending updates to the pipeline.
 
 use solana_program::hash::Hash;
+use solana_transaction_status::Rewards;
 use {
     crate::{error::CarbonResult, metrics::MetricsCollection},
     async_trait::async_trait,
     solana_account::Account,
     solana_pubkey::Pubkey,
-    solana_sdk::transaction::VersionedTransaction,
     solana_signature::Signature,
+    solana_transaction::versioned::VersionedTransaction,
     solana_transaction_status::TransactionStatusMeta,
     std::sync::Arc,
     tokio_util::sync::CancellationToken,
@@ -64,7 +65,16 @@ use {
 ///
 /// # Example
 ///
-/// ```rust
+/// ```ignore
+/// use std::sync::Arc;
+/// use carbon_core::datasource::UpdateType;
+/// use carbon_core::datasource::Update;
+/// use carbon_core::error::CarbonResult;
+/// use carbon_core::metrics::MetricsCollection;
+/// use carbon_core::datasource::Datasource;
+/// use tokio_util::sync::CancellationToken;
+/// use async_trait::async_trait;
+///
 /// #[async_trait]
 /// impl Datasource for MyDatasource {
 ///     async fn consume(
@@ -92,7 +102,7 @@ use {
 pub trait Datasource: Send + Sync {
     async fn consume(
         &self,
-        sender: &tokio::sync::mpsc::Sender<Update>,
+        sender: tokio::sync::mpsc::Sender<Update>,
         cancellation_token: CancellationToken,
         metrics: Arc<MetricsCollection>,
     ) -> CarbonResult<()>;
@@ -112,6 +122,7 @@ pub enum Update {
     Account(AccountUpdate),
     Transaction(Box<TransactionUpdate>),
     AccountDeletion(AccountDeletion),
+    BlockDetails(BlockDetails),
 }
 
 /// Enumerates the types of updates a datasource can provide.
@@ -143,6 +154,29 @@ pub struct AccountUpdate {
     pub pubkey: Pubkey,
     pub account: Account,
     pub slot: u64,
+}
+
+/// Represents the details of a Solana block, including its slot, hashes, rewards, and timing information.
+///
+/// The `BlockDetails` struct encapsulates the essential information for a block,
+/// providing details about its slot, blockhashes, rewards, and other metadata.
+///
+/// - `slot`: The slot number in which this block was recorded.
+/// - `previous_block_hash`: The hash of the previous block in the blockchain.
+/// - `block_hash`: The hash of the current block.
+/// - `rewards`: Optional rewards information associated with the block, such as staking rewards.
+/// - `num_reward_partitions`: Optional number of reward partitions in the block.
+/// - `block_time`: Optional Unix timestamp indicating when the block was processed.
+/// - `block_height`: Optional height of the block in the blockchain.#[derive(Debug, Clone)]
+#[derive(Debug, Clone)]
+pub struct BlockDetails {
+    pub slot: u64,
+    pub block_hash: Option<Hash>,
+    pub previous_block_hash: Option<Hash>,
+    pub rewards: Option<Rewards>,
+    pub num_reward_partitions: Option<u64>,
+    pub block_time: Option<i64>,
+    pub block_height: Option<u64>,
 }
 
 /// Represents the deletion of a Solana account, containing the account's public

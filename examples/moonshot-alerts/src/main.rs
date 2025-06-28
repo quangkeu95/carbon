@@ -22,8 +22,8 @@ use {
 
 #[tokio::main]
 pub async fn main() -> CarbonResult<()> {
-    env_logger::init();
     dotenv::dotenv().ok();
+    env_logger::init();
 
     let filters = Filters::new(
         RpcBlockSubscribeFilter::MentionsAccountOrProgram(MOONSHOT_PROGRAM_ID.to_string()),
@@ -60,11 +60,12 @@ impl Processor for MoonshotInstructionProcessor {
         InstructionMetadata,
         DecodedInstruction<MoonshotInstruction>,
         NestedInstructions,
+        solana_instruction::Instruction,
     );
 
     async fn process(
         &mut self,
-        (metadata, instruction, _nested_instructions): Self::InputType,
+        (metadata, instruction, _nested_instructions, _): Self::InputType,
         _metrics: Arc<MetricsCollection>,
     ) -> CarbonResult<()> {
         let signature = metadata.transaction_metadata.signature;

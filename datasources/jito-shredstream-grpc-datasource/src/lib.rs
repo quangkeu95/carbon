@@ -5,10 +5,10 @@ use {
         error::CarbonResult,
         metrics::MetricsCollection,
     },
-    futures::{stream::try_unfold, TryStreamExt},
     carbon_jito_protos::shredstream::{
         shredstream_proxy_client::ShredstreamProxyClient, SubscribeEntriesRequest,
     },
+    futures::{stream::try_unfold, TryStreamExt},
     scc::HashCache,
     solana_client::rpc_client::SerializableTransaction,
     solana_entry::entry::Entry,
@@ -34,11 +34,10 @@ impl JitoShredstreamGrpcClient {
 impl Datasource for JitoShredstreamGrpcClient {
     async fn consume(
         &self,
-        sender: &Sender<Update>,
+        sender: Sender<Update>,
         cancellation_token: CancellationToken,
         metrics: Arc<MetricsCollection>,
     ) -> CarbonResult<()> {
-        let sender = sender.clone();
         let endpoint = self.0.clone();
 
         let mut client = ShredstreamProxyClient::connect(endpoint)

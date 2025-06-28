@@ -25,8 +25,8 @@ use {
 
 #[tokio::main]
 pub async fn main() -> CarbonResult<()> {
-    env_logger::init();
     dotenv::dotenv().ok();
+    env_logger::init();
 
     let mut account_filters: HashMap<String, SubscribeRequestFilterAccounts> = HashMap::new();
     account_filters.insert(
@@ -59,6 +59,7 @@ pub async fn main() -> CarbonResult<()> {
         Some(CommitmentLevel::Confirmed),
         account_filters,
         transaction_filters,
+        Default::default(),
         Arc::new(RwLock::new(HashSet::new())),
     );
 
@@ -82,11 +83,12 @@ impl Processor for KaminoLendingInstructionProcessor {
         InstructionMetadata,
         DecodedInstruction<KaminoLendingInstruction>,
         NestedInstructions,
+        solana_instruction::Instruction,
     );
 
     async fn process(
         &mut self,
-        (metadata, instruction, _nested_instructions): Self::InputType,
+        (metadata, instruction, _nested_instructions, _): Self::InputType,
         _metrics: Arc<MetricsCollection>,
     ) -> CarbonResult<()> {
         let signature = metadata.transaction_metadata.signature;
@@ -110,7 +112,11 @@ impl Processor for KaminoLendingInstructionProcessor {
 pub struct KaminoLendingAccountProcessor;
 #[async_trait]
 impl Processor for KaminoLendingAccountProcessor {
-    type InputType = (AccountMetadata, DecodedAccount<KaminoLendingAccount>);
+    type InputType = (
+        AccountMetadata,
+        DecodedAccount<KaminoLendingAccount>,
+        solana_account::Account,
+    );
 
     async fn process(
         &mut self,

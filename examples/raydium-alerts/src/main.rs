@@ -30,8 +30,8 @@ use {
 
 #[tokio::main]
 pub async fn main() -> CarbonResult<()> {
-    env_logger::init();
     dotenv::dotenv().ok();
+    env_logger::init();
 
     // NOTE: Workaround, that solving issue https://github.com/rustls/rustls/issues/1877
     rustls::crypto::aws_lc_rs::default_provider()
@@ -69,6 +69,7 @@ pub async fn main() -> CarbonResult<()> {
         Some(CommitmentLevel::Confirmed),
         account_filters,
         transaction_filters,
+        Default::default(),
         Arc::new(RwLock::new(HashSet::new())),
     );
 
@@ -94,11 +95,12 @@ impl Processor for RaydiumAmmV4InstructionProcessor {
         InstructionMetadata,
         DecodedInstruction<RaydiumAmmV4Instruction>,
         NestedInstructions,
+        solana_instruction::Instruction,
     );
 
     async fn process(
         &mut self,
-        (metadata, instruction, _nested_instructions): Self::InputType,
+        (metadata, instruction, _nested_instructions, _): Self::InputType,
         _metrics: Arc<MetricsCollection>,
     ) -> CarbonResult<()> {
         let signature = metadata.transaction_metadata.signature;
@@ -194,7 +196,11 @@ impl Processor for RaydiumAmmV4InstructionProcessor {
 pub struct RaydiumAmmV4AccountProcessor;
 #[async_trait]
 impl Processor for RaydiumAmmV4AccountProcessor {
-    type InputType = (AccountMetadata, DecodedAccount<RaydiumAmmV4Account>);
+    type InputType = (
+        AccountMetadata,
+        DecodedAccount<RaydiumAmmV4Account>,
+        solana_account::Account,
+    );
 
     async fn process(
         &mut self,

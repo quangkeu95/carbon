@@ -23,8 +23,8 @@ use {
 
 #[tokio::main]
 pub async fn main() -> CarbonResult<()> {
-    env_logger::init();
     dotenv::dotenv().ok();
+    env_logger::init();
 
     // NOTE: Workaround, that solving issue https://github.com/rustls/rustls/issues/1877
     rustls::crypto::aws_lc_rs::default_provider()
@@ -54,6 +54,7 @@ pub async fn main() -> CarbonResult<()> {
         Some(CommitmentLevel::Confirmed),
         HashMap::default(),
         transaction_filters,
+        Default::default(),
         Arc::new(RwLock::new(HashSet::new())),
     );
 
@@ -78,10 +79,11 @@ impl Processor for JupiterSwapInstructionProcessor {
         InstructionMetadata,
         DecodedInstruction<JupiterSwapInstruction>,
         NestedInstructions,
+        solana_instruction::Instruction,
     );
     async fn process(
         &mut self,
-        (metadata, instruction, nested_instructions): Self::InputType,
+        (metadata, instruction, nested_instructions, _): Self::InputType,
         _metrics: Arc<MetricsCollection>,
     ) -> CarbonResult<()> {
         let signature = metadata.transaction_metadata.signature;

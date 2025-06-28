@@ -52,7 +52,7 @@ impl GpaBackfillDatasource {
 impl Datasource for GpaBackfillDatasource {
     async fn consume(
         &self,
-        sender: &Sender<Update>,
+        sender: Sender<Update>,
         _cancellation_token: CancellationToken,
         _metrics: Arc<MetricsCollection>,
     ) -> CarbonResult<()> {
@@ -108,7 +108,7 @@ impl Processor for SharkyAccountProcessor {
         update: Self::InputType,
         _metrics: Arc<MetricsCollection>,
     ) -> CarbonResult<()> {
-        let (_metadata, account) = update;
+        let (_metadata, account, _raw_account) = update;
 
         match account.data {
             SharkyAccount::OrderBook(order_book) => {
@@ -131,8 +131,8 @@ instruction_decoder_collection!(
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    env_logger::init();
     dotenv::dotenv().ok();
+    env_logger::init();
 
     Pipeline::builder()
         .datasource(GpaBackfillDatasource::new(
